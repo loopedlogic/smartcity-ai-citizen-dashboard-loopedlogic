@@ -1,0 +1,8 @@
+{
+  "name": "smartcity-ai-citizen-dashboard",
+  "private": true,
+  "scripts": {
+    "dev": "npx --yes netlify-cli@17 dev -d . -f netlify/functions --framework \"#static\"",
+    "build": "echo \"Static site; no build step\""
+  }
+}

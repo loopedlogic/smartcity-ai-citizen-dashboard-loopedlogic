@@ -1,0 +1,18 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+# Static HTML + functions only (avoid parent-folder framework auto-detect)
+[dev]
+  framework = "#static"
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Optional alias: /api/weather → /.netlify/functions/weather
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
