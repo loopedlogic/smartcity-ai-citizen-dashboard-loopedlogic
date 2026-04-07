@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartCity AI Citizen Dashboard</title>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
   <style>
     :root {
       --primary: #00e5ff;
@@ -18,83 +17,479 @@
       --text-main: #ffffff;
       --text-muted: #8ea3cc;
       --card-border: rgba(0, 229, 255, 0.2);
+      --danger: #ff4757;
     }
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%); color: var(--text-main); min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
-    
-    header { padding: 2rem; text-align: center; background: rgba(11, 19, 43, 0.6); backdrop-filter: blur(10px); border-bottom: 1px solid var(--card-border); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
-    header h1 { font-size: 2.5rem; font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); display: flex; align-items: center; justify-content: center; gap: 15px; }
-    
-    .container { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
-    
-    .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 16px; padding: 2rem; backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0, 229, 255, 0.2); border-color: rgba(0, 229, 255, 0.5); }
-    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--primary), #a200ff); }
-    
-    .card-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
-    .card-content { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 150px; }
-    
-    .data-row { display: flex; align-items: center; margin-bottom: 1rem; font-size: 1.1rem; }
-    .data-row i { width: 30px; color: var(--text-muted); font-size: 1.3rem; }
-    .data-value { font-weight: 500; }
-    
-    .source-label { font-size: 0.75rem; color: #647b99; text-transform: uppercase; margin-top: auto; padding-top: 15px; letter-spacing: 0.5px; opacity: 0.8; font-weight: 600; text-align: right; }
-    
-    .btn-refresh { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 0.8rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; margin-top: 15px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
-    .btn-refresh:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
-    .btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
-    
-    .weather-desc { font-size: 1.3rem; font-weight: 600; margin-top: 10px; color: #fff; }
-    .currency-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-    .currency-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 3px solid var(--primary); font-family: monospace; font-size: 1.1rem; }
-    
-    .profile-card { text-align: center; }
-    .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 1rem auto; display: block; object-fit: cover; }
-    .profile-name { font-size: 1.4rem; font-weight: 600; margin-bottom: 5px; }
-    .profile-email, .profile-city { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 5px; text-transform: capitalize; }
-    .fact-text { font-size: 1.2rem; font-style: italic; line-height: 1.6; border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 10px; color: #e6e6e6; }
-    
-    /* Skeletons */
-    @keyframes skeleton-loading { 0% { background-color: rgba(255,255,255,0.05); } 50% { background-color: rgba(0,229,255,0.15); } 100% { background-color: rgba(255,255,255,0.05); } }
-    .skeleton-box { border-radius: 4px; animation: skeleton-loading 1.5s infinite; margin-bottom: 10px; height: 20px; }
-    .skeleton-circle { width: 90px; height: 90px; border-radius: 50%; animation: skeleton-loading 1.5s infinite; margin: 0 auto 15px auto; }
-    
-    .error-state { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ff4757; text-align: center; gap: 10px; height: 100%; }
-    
-    /* Chatbot UI */
-    .chatbot-toggle { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #007bb5); color: #fff; border: none; box-shadow: 0 8px 30px rgba(0, 229, 255, 0.4); cursor: pointer; font-size: 1.8rem; z-index: 999; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
-    .chatbot-toggle:hover { transform: scale(1.1); }
-    
-    .chat-window { position: fixed; bottom: 110px; right: 30px; width: 380px; height: 550px; background: #111a33; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); border: 1px solid rgba(0, 229, 255, 0.3); display: flex; flex-direction: column; z-index: 1000; opacity: 0; transform: translateY(20px); pointer-events: none; transition: all 0.4s; overflow: hidden; }
-    .chat-window.open { opacity: 1; transform: translateY(0); pointer-events: all; }
-    
-    .chat-header { background: linear-gradient(135deg, #1c2541, #0b132b); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 229, 255, 0.2); }
-    .chat-header h3 { font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-    .chat-header .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
-    .chat-header .close-btn:hover { color: #ff4757; }
-    
-    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-    .message { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
-    .message.user { align-self: flex-end; background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 166, 255, 0.2)); border-bottom-right-radius: 4px; border: 1px solid rgba(0, 229, 255, 0.3); }
-    .message.ai { align-self: flex-start; background: rgba(255, 255, 255, 0.05); border-bottom-left-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); }
-    .message.error { background: rgba(255, 71, 87, 0.1); border: 1px solid rgba(255, 71, 87, 0.3); color: #ff4757; }
-    
-    .thinking { align-self: flex-start; display: flex; gap: 4px; padding: 12px 16px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; }
-    .dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 2rem;
+      text-align: center;
+      background: rgba(11, 19, 43, 0.6);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .container {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      min-height: 320px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 229, 255, 0.2);
+      border-color: rgba(0, 229, 255, 0.5);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), #a200ff);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .widget-date {
+      font-size: 0.78rem;
+      color: #9cb1d6;
+      margin-bottom: 1rem;
+      text-align: left;
+      opacity: 0.95;
+    }
+
+    .card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 150px;
+    }
+
+    .data-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .data-row i {
+      width: 30px;
+      color: var(--text-muted);
+      font-size: 1.3rem;
+    }
+
+    .data-value {
+      font-weight: 500;
+    }
+
+    .source-label {
+      font-size: 0.75rem;
+      color: #647b99;
+      text-transform: uppercase;
+      margin-top: auto;
+      padding-top: 15px;
+      letter-spacing: 0.5px;
+      opacity: 0.85;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .btn-refresh {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 15px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-refresh:hover {
+      background: var(--primary);
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+    }
+
+    .btn-refresh:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .weather-desc {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-top: 10px;
+      color: #fff;
+    }
+
+    .currency-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .currency-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+      font-family: monospace;
+      font-size: 1.1rem;
+    }
+
+    .profile-card {
+      text-align: center;
+    }
+
+    .profile-img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      margin: 0 auto 1rem auto;
+      display: block;
+      object-fit: cover;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .profile-name {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .profile-email,
+    .profile-city {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 5px;
+      text-transform: capitalize;
+      word-break: break-word;
+    }
+
+    .fact-text {
+      font-size: 1.2rem;
+      font-style: italic;
+      line-height: 1.6;
+      border-left: 4px solid var(--primary);
+      padding-left: 15px;
+      margin-bottom: 10px;
+      color: #e6e6e6;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-color: rgba(255,255,255,0.05); }
+      50% { background-color: rgba(0,229,255,0.15); }
+      100% { background-color: rgba(255,255,255,0.05); }
+    }
+
+    .skeleton-box {
+      border-radius: 4px;
+      animation: skeleton-loading 1.5s infinite;
+      margin-bottom: 10px;
+      height: 20px;
+    }
+
+    .skeleton-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      animation: skeleton-loading 1.5s infinite;
+      margin: 0 auto 15px auto;
+    }
+
+    .error-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--danger);
+      text-align: center;
+      gap: 10px;
+      height: 100%;
+    }
+
+    .chatbot-toggle {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #007bb5);
+      color: #fff;
+      border: none;
+      box-shadow: 0 8px 30px rgba(0, 229, 255, 0.4);
+      cursor: pointer;
+      font-size: 1.8rem;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+
+    .chatbot-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .chat-window {
+      position: fixed;
+      bottom: 110px;
+      right: 30px;
+      width: 380px;
+      height: 550px;
+      background: #111a33;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: all 0.4s;
+      overflow: hidden;
+    }
+
+    .chat-window.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, #1c2541, #0b132b);
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+    }
+
+    .chat-header h3 {
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-header .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .chat-header .close-btn:hover {
+      color: var(--danger);
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 166, 255, 0.2));
+      border-bottom-right-radius: 4px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+
+    .message.ai {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .message.error {
+      background: rgba(255, 71, 87, 0.1);
+      border: 1px solid rgba(255, 71, 87, 0.3);
+      color: #ff8a95;
+    }
+
+    .thinking {
+      align-self: flex-start;
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
     .dot:nth-child(1) { animation-delay: -0.32s; }
     .dot:nth-child(2) { animation-delay: -0.16s; }
-    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
-    
-    .chat-input-container { padding: 15px; background: rgba(11, 19, 43, 0.8); border-top: 1px solid rgba(0, 229, 255, 0.2); display: flex; gap: 10px; }
-    .chat-input { flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 15px; border-radius: 8px; color: #fff; outline: none; }
-    .chat-input:focus { border-color: var(--primary); }
-    .chat-send-btn { background: var(--primary); color: #000; border: none; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .chat-send-btn:hover { background: #00aec2; }
-    
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    .chat-input-container {
+      padding: 15px;
+      background: rgba(11, 19, 43, 0.8);
+      border-top: 1px solid rgba(0, 229, 255, 0.2);
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 15px;
+      border-radius: 8px;
+      color: #fff;
+      outline: none;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary);
+    }
+
+    .chat-send-btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-send-btn:hover {
+      background: var(--primary-dark);
+    }
+
     @media (max-width: 768px) {
-      .chat-window { width: calc(100% - 40px); right: 20px; bottom: 100px; height: 500px; }
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .card {
+        padding: 1.25rem;
+        min-height: auto;
+      }
+
+      .chat-window {
+        width: calc(100% - 40px);
+        right: 20px;
+        bottom: 100px;
+        height: 500px;
+      }
+
+      .chatbot-toggle {
+        right: 20px;
+        bottom: 20px;
+      }
     }
   </style>
 </head>
@@ -103,60 +498,83 @@
     <h1><i class="fa-solid fa-city"></i> SmartCity AI Citizen Dashboard</h1>
   </header>
 
-  <div class="container">
+  <main class="container">
     <div class="dashboard-grid">
-      <!-- Live Weather -->
-      <div class="card" id="card-weather">
+      <section class="card" id="card-weather">
         <div class="card-title"><i class="fa-solid fa-cloud-sun-rain"></i> Live Weather</div>
+        <div id="date-weather" class="widget-date">Updated: --</div>
         <div class="card-content" id="content-weather"></div>
         <div class="source-label" id="source-weather"></div>
-        <button class="btn-refresh" id="btn-weather" onclick="fetchWeather()"><i class="fa-solid fa-rotate"></i> Refresh Weather</button>
-      </div>
+        <button class="btn-refresh" id="btn-weather" onclick="fetchWeather()">
+          <i class="fa-solid fa-rotate"></i> Refresh Weather
+        </button>
+      </section>
 
-      <!-- Currency Exchange -->
-      <div class="card" id="card-currency">
+      <section class="card" id="card-currency">
         <div class="card-title"><i class="fa-solid fa-money-bill-trend-up"></i> Exchange Rates</div>
+        <div id="date-currency" class="widget-date">Updated: --</div>
         <div class="card-content" id="content-currency"></div>
         <div class="source-label" id="source-currency"></div>
-        <button class="btn-refresh" id="btn-currency" onclick="fetchCurrency()"><i class="fa-solid fa-rotate"></i> Refresh Rates</button>
-      </div>
+        <button class="btn-refresh" id="btn-currency" onclick="fetchCurrency()">
+          <i class="fa-solid fa-rotate"></i> Refresh Rates
+        </button>
+      </section>
 
-      <!-- Featured Citizen -->
-      <div class="card" id="card-citizen">
+      <section class="card" id="card-citizen">
         <div class="card-title" id="title-citizen"><i class="fa-solid fa-id-card"></i> Featured Citizen</div>
+        <div id="date-citizen" class="widget-date">Updated: --</div>
         <div class="card-content" id="content-citizen"></div>
         <div class="source-label" id="source-citizen"></div>
-        <button class="btn-refresh" id="btn-citizen" onclick="fetchCitizen()"><i class="fa-solid fa-rotate"></i> New Citizen</button>
-      </div>
+        <button class="btn-refresh" id="btn-citizen" onclick="fetchCitizen()">
+          <i class="fa-solid fa-rotate"></i> New Citizen
+        </button>
+      </section>
 
-      <!-- City Fact -->
-      <div class="card" id="card-fact">
+      <section class="card" id="card-fact">
         <div class="card-title" id="title-fact"><i class="fa-solid fa-lightbulb"></i> City Fact of the Day</div>
+        <div id="date-fact" class="widget-date">Updated: --</div>
         <div class="card-content" id="content-fact"></div>
         <div class="source-label" id="source-fact"></div>
-        <button class="btn-refresh" id="btn-fact" onclick="fetchFact()"><i class="fa-solid fa-rotate"></i> New Fact</button>
-      </div>
+        <button class="btn-refresh" id="btn-fact" onclick="fetchFact()">
+          <i class="fa-solid fa-rotate"></i> New Fact
+        </button>
+      </section>
     </div>
-  </div>
+  </main>
 
-  <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()"><i class="fa-solid fa-robot"></i></button>
+  <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Open chatbot">
+    <i class="fa-solid fa-robot"></i>
+  </button>
 
-  <div class="chat-window" id="chatWindow">
+  <div class="chat-window" id="chatWindow" aria-hidden="true">
     <div class="chat-header">
       <h3><i class="fa-solid fa-robot" style="color:var(--primary);"></i> AI Assistant</h3>
-      <button class="close-btn" onclick="toggleChatbot()"><i class="fa-solid fa-times"></i></button>
+      <button class="close-btn" onclick="toggleChatbot()" aria-label="Close chatbot">
+        <i class="fa-solid fa-times"></i>
+      </button>
     </div>
+
     <div class="chat-messages" id="chatMessages">
-      <div class="message ai">Hello! I'm your SmartCity AI Assistant. Ask me anything about the live weather, currency, featured citizen, or city fact currently loaded on this dashboard!</div>
+      <div class="message ai">
+        Hello! I'm your SmartCity AI Assistant. Ask me anything about the live weather, currency, featured citizen, or city fact currently loaded on this dashboard.
+      </div>
     </div>
+
     <div class="chat-input-container">
-      <input type="text" id="chatInput" class="chat-input" placeholder="Ask a question..." onkeydown="handleEnter(event)">
-      <button class="chat-send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      <input
+        type="text"
+        id="chatInput"
+        class="chat-input"
+        placeholder="Ask a question..."
+        onkeydown="handleEnter(event)"
+      />
+      <button class="chat-send-btn" onclick="sendMessage()" aria-label="Send message">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
     </div>
   </div>
 
   <script>
-    // Full API payloads for dashboard + chatbot (assignment requirement)
     let weatherData = null;
     let currencyData = null;
     let citizenData = null;
@@ -171,32 +589,66 @@
     };
 
     const WEATHER_CODE_MAP = {
-      0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast", 45: "Foggy", 48: "Depositing rime fog",
-      51: "Light drizzle", 53: "Moderate drizzle", 55: "Dense drizzle", 56: "Light freezing drizzle", 57: "Dense freezing drizzle",
-      61: "Slight rain", 63: "Moderate rain", 65: "Heavy rain", 66: "Light freezing rain", 67: "Heavy freezing rain",
-      71: "Slight snow", 73: "Moderate snow", 75: "Heavy snow", 77: "Snow grains",
-      80: "Slight rain showers", 81: "Moderate rain showers", 82: "Violent rain showers", 85: "Slight snow showers", 86: "Heavy snow showers",
-      95: "Thunderstorm", 96: "Thunderstorm with slight hail", 99: "Thunderstorm with heavy hail"
+      0: "Clear sky",
+      1: "Mainly clear",
+      2: "Partly cloudy",
+      3: "Overcast",
+      45: "Foggy",
+      48: "Depositing rime fog",
+      51: "Light drizzle",
+      53: "Moderate drizzle",
+      55: "Dense drizzle",
+      56: "Light freezing drizzle",
+      57: "Dense freezing drizzle",
+      61: "Slight rain",
+      63: "Moderate rain",
+      65: "Heavy rain",
+      66: "Light freezing rain",
+      67: "Heavy freezing rain",
+      71: "Slight snow",
+      73: "Moderate snow",
+      75: "Heavy snow",
+      77: "Snow grains",
+      80: "Slight rain showers",
+      81: "Moderate rain showers",
+      82: "Violent rain showers",
+      85: "Slight snow showers",
+      86: "Heavy snow showers",
+      95: "Thunderstorm",
+      96: "Thunderstorm with slight hail",
+      99: "Thunderstorm with heavy hail"
     };
 
-    function esc(s) {
-      return String(s == null ? "" : s)
+    function esc(value) {
+      return String(value == null ? "" : value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     function safePhotoUrl(url) {
       const u = String(url || "");
-      return u.indexOf("https://") === 0 || u.indexOf("http://") === 0 ? u : "https://via.placeholder.com/90";
+      return u.startsWith("https://") || u.startsWith("http://")
+        ? u
+        : "https://via.placeholder.com/90";
+    }
+
+    function stampNow(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const now = new Date();
+      el.innerText = "Updated: " + now.toLocaleString();
     }
 
     async function fetchViaFunction(name) {
       const res = await fetch("/.netlify/functions/" + name);
       const j = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(j.error || "proxy failed");
-      if (j.error && !j.current_weather && !j.rates && !j.results && j.text == null) throw new Error(j.error);
+      if (j.error && !j.current_weather && !j.rates && !j.results && j.text == null) {
+        throw new Error(j.error);
+      }
       return j;
     }
 
@@ -224,21 +676,28 @@
       } catch (e) {
         console.warn("Open-Meteo browser fetch failed:", e);
       }
+
       const wRes = await fetch(DIRECT_API.weatherWttr, {
         headers: { Accept: "application/json" }
       });
+
       if (!wRes.ok) throw new Error("Weather backup (wttr.in) failed");
+
       const wttr = await wRes.json();
       const cc = wttr.current_condition && wttr.current_condition[0];
       if (!cc) throw new Error("wttr.in returned no current conditions");
-      const temp = parseFloat(cc.temp_C, 10);
-      const wind = parseFloat(cc.windspeedKmph, 10);
+
+      const temp = parseFloat(cc.temp_C);
+      const wind = parseFloat(cc.windspeedKmph);
+
       if (Number.isNaN(temp) || Number.isNaN(wind)) {
         throw new Error("wttr.in invalid data");
       }
+
       const desc =
         (cc.weatherDesc && cc.weatherDesc[0] && cc.weatherDesc[0].value) || "Unknown";
       const code = Number.parseInt(String(cc.weatherCode), 10);
+
       return {
         source: "wttr.in (browser backup — Open-Meteo unavailable)",
         weatherDescription: desc,
@@ -256,16 +715,21 @@
         return await fetchViaFunction(name);
       } catch (e) {
         console.warn("Netlify function unavailable, trying browser fetch:", name, e);
+
         if (name === "weather") {
           return await fetchWeatherBrowserFallback();
         }
+
         const raw = await fetchDirect(name);
+
         if (name === "currency") {
           if (raw.result && raw.result !== "success") {
             throw new Error(raw.message || raw["error-type"] || "ER-API error");
           }
+
           const inr = raw.rates && raw.rates.INR;
           if (typeof inr !== "number" || inr <= 0) throw new Error("no INR rate");
+
           return {
             ...raw,
             source: "ER-API (browser direct)",
@@ -276,6 +740,7 @@
             }
           };
         }
+
         if (name === "citizen") {
           let c = raw;
           if (!c.results || !c.results[0]) {
@@ -286,6 +751,7 @@
           }
           return { ...c, source: "RandomUser (browser direct)" };
         }
+
         if (name === "fact") {
           return {
             ...raw,
@@ -293,74 +759,85 @@
             cardTitle: "City Fact of the Day"
           };
         }
+
         return raw;
       }
     }
 
-    const showSkeleton = (elId, type) => {
-      if (type === 'profile') {
-        document.getElementById(elId).innerHTML = `
+    function showSkeleton(elId, type) {
+      const el = document.getElementById(elId);
+
+      if (type === "profile") {
+        el.innerHTML = `
           <div class="profile-card">
             <div class="skeleton-circle"></div>
             <div class="skeleton-box" style="width: 50%; margin: 0 auto 10px auto; height: 25px;"></div>
             <div class="skeleton-box" style="width: 60%; margin: 0 auto 10px auto;"></div>
             <div class="skeleton-box" style="width: 40%; margin: 0 auto;"></div>
-          </div>`;
+          </div>
+        `;
       } else {
-        document.getElementById(elId).innerHTML = `
+        el.innerHTML = `
           <div style="width:100%;">
             <div class="skeleton-box" style="width: 70%; height: 25px; margin-bottom: 20px;"></div>
             <div class="skeleton-box" style="width: 100%;"></div>
             <div class="skeleton-box" style="width: 90%;"></div>
             <div class="skeleton-box" style="width: 60%;"></div>
-          </div>`;
+          </div>
+        `;
       }
-    };
+    }
 
-    const showError = (elId, sourceId, msg) => {
+    function showError(elId, sourceId, msg) {
       document.getElementById(elId).innerHTML = `
         <div class="error-state">
           <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem;"></i>
           <strong>Component Failure</strong>
-          <span style="font-size:0.9rem;">${msg}</span>
-        </div>`;
-      document.getElementById(sourceId).innerText = '';
-    };
+          <span style="font-size:0.9rem;">${esc(msg)}</span>
+        </div>
+      `;
+      document.getElementById(sourceId).innerText = "";
+    }
 
     async function fetchWeather() {
       showSkeleton("content-weather", "text");
       document.getElementById("source-weather").innerText = "";
       document.getElementById("btn-weather").disabled = true;
+
       try {
         const data = await loadDashboardData("weather");
         weatherData = data;
+
         const cw = data.current_weather;
         if (!cw) throw new Error("Missing current_weather");
+
         const temp = cw.temperature;
         const wind = cw.windspeed;
         const code = cw.weathercode;
-        const desc =
-          data.weatherDescription != null
-            ? data.weatherDescription
-            : WEATHER_CODE_MAP[code] || "Unknown";
+        const desc = data.weatherDescription != null
+          ? data.weatherDescription
+          : (WEATHER_CODE_MAP[code] || "Unknown");
+
         document.getElementById("content-weather").innerHTML =
           '<div class="data-row"><i class="fa-solid fa-temperature-half"></i><span class="data-value">' +
           esc(temp) +
-          " °C</span></div>" +
+          ' °C</span></div>' +
           '<div class="data-row"><i class="fa-solid fa-wind"></i><span class="data-value">' +
           esc(wind) +
-          " km/h</span></div>" +
+          ' km/h</span></div>' +
           '<div class="weather-desc">' +
           esc(desc) +
-          "</div>";
+          '</div>';
+
         document.getElementById("source-weather").innerText =
           "Source: " + (data.source || "Open-Meteo");
+        stampNow("date-weather");
       } catch (err) {
         weatherData = null;
         showError(
           "content-weather",
           "source-weather",
-          err.message || "Could not load weather (use Netlify Dev or deploy to Netlify)."
+          err.message || "Could not load weather."
         );
       } finally {
         document.getElementById("btn-weather").disabled = false;
@@ -371,10 +848,13 @@
       showSkeleton("content-currency", "text");
       document.getElementById("source-currency").innerText = "";
       document.getElementById("btn-currency").disabled = true;
+
       try {
         const data = await loadDashboardData("currency");
         currencyData = data;
+
         let u, eur, gbp;
+
         if (data.computed) {
           u = data.computed.USD;
           eur = data.computed.EUR;
@@ -387,22 +867,24 @@
         } else {
           throw new Error("Invalid currency payload");
         }
-        const fmt = function (n) {
-          return Number(n).toFixed(4);
-        };
+
+        const fmt = (n) => Number(n).toFixed(4);
+
         document.getElementById("content-currency").innerHTML =
           '<div class="currency-grid">' +
           '<div class="currency-item"><span><b>1</b> INR =</span><span><b>' +
           esc(fmt(u)) +
-          "</b> USD</span></div>" +
+          '</b> USD</span></div>' +
           '<div class="currency-item"><span><b>1</b> INR =</span><span><b>' +
           esc(fmt(eur)) +
-          "</b> EUR</span></div>" +
+          '</b> EUR</span></div>' +
           '<div class="currency-item"><span><b>1</b> INR =</span><span><b>' +
           esc(fmt(gbp)) +
-          "</b> GBP</span></div></div>";
+          '</b> GBP</span></div></div>';
+
         document.getElementById("source-currency").innerText =
           "Source: " + (data.source || "ER-API");
+        stampNow("date-currency");
       } catch (err) {
         currencyData = null;
         showError(
@@ -419,34 +901,32 @@
       showSkeleton("content-citizen", "profile");
       document.getElementById("source-citizen").innerText = "";
       document.getElementById("btn-citizen").disabled = true;
+
       try {
         const data = await loadDashboardData("citizen");
         citizenData = data;
+
         const u = data.results && data.results[0];
         if (!u) throw new Error("No citizen in results[0]");
-        const name =
-          ((u.name && u.name.first) || "") + " " + ((u.name && u.name.last) || "");
+
+        const name = ((u.name && u.name.first) || "") + " " + ((u.name && u.name.last) || "");
         const email = u.email || "N/A";
         const city = (u.location && u.location.city) || "N/A";
         const photo = safePhotoUrl(
           (u.picture && (u.picture.large || u.picture.medium)) || ""
         );
+
         document.getElementById("content-citizen").innerHTML =
           '<div class="profile-card">' +
-          '<img src="' +
-          esc(photo) +
-          '" class="profile-img" alt="Citizen Photo">' +
-          '<div class="profile-name">' +
-          esc(name.trim()) +
-          "</div>" +
-          '<div class="profile-city"><i class="fa-solid fa-location-dot"></i> ' +
-          esc(city) +
-          "</div>" +
-          '<div class="profile-email"><i class="fa-solid fa-envelope"></i> ' +
-          esc(email) +
-          "</div></div>";
+          '<img src="' + esc(photo) + '" class="profile-img" alt="Citizen Photo">' +
+          '<div class="profile-name">' + esc(name.trim()) + '</div>' +
+          '<div class="profile-city"><i class="fa-solid fa-location-dot"></i> ' + esc(city) + '</div>' +
+          '<div class="profile-email"><i class="fa-solid fa-envelope"></i> ' + esc(email) + '</div>' +
+          '</div>';
+
         document.getElementById("source-citizen").innerText =
           "Source: " + (data.source || "RandomUser");
+        stampNow("date-citizen");
       } catch (err) {
         citizenData = null;
         showError(
@@ -463,18 +943,23 @@
       showSkeleton("content-fact", "text");
       document.getElementById("source-fact").innerText = "";
       document.getElementById("btn-fact").disabled = true;
+
       try {
         const data = await loadDashboardData("fact");
         factData = data;
+
         const text = data.text;
         if (text == null || String(text).trim() === "") throw new Error("Empty fact");
+
         const title = data.cardTitle || "City Fact of the Day";
         const srcLabel = data.providerLabel || data.source || "UselessFacts";
+
         document.getElementById("title-fact").innerHTML =
           '<i class="fa-solid fa-lightbulb"></i> ' + esc(title);
         document.getElementById("content-fact").innerHTML =
           '<div class="fact-text">"' + esc(text) + '"</div>';
         document.getElementById("source-fact").innerText = "Source: " + srcLabel;
+        stampNow("date-fact");
       } catch (err) {
         factData = null;
         showError(
@@ -487,8 +972,194 @@
       }
     }
 
+    function toggleChatbot() {
+      const w = document.getElementById("chatWindow");
+      const isOpen = w.classList.toggle("open");
+      w.setAttribute("aria-hidden", isOpen ? "false" : "true");
+
+      if (isOpen) {
+        setTimeout(() => {
+          const input = document.getElementById("chatInput");
+          if (input) input.focus();
+        }, 300);
+      }
+    }
+
+    function handleEnter(e) {
+      if (e.key === "Enter") sendMessage();
+    }
+
+    function appendMessage(text, role) {
+      const c = document.getElementById("chatMessages");
+      const d = document.createElement("div");
+      d.className = "message " + role;
+      d.textContent = text;
+      c.appendChild(d);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function showThinking() {
+      const c = document.getElementById("chatMessages");
+      const d = document.createElement("div");
+      d.className = "thinking";
+      d.id = "thinkingIndicator";
+      d.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      c.appendChild(d);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function removeThinking() {
+      const el = document.getElementById("thinkingIndicator");
+      if (el) el.remove();
+    }
+
+    async function sendMessage() {
+      const inputEl = document.getElementById("chatInput");
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      appendMessage(text, "user");
+      inputEl.value = "";
+      showThinking();
+
+      const payload = {
+        question: text,
+        dashboardData: {
+          weatherData,
+          currencyData,
+          citizenData,
+          factData
+        }
+      };
+
+      try {
+        const res = await fetch("/.netlify/functions/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (_) {
+          data = {};
+        }
+
+        removeThinking();
+
+        if (res.ok && data && data.reply) {
+          appendMessage(data.reply, "ai");
+          return;
+        }
+
+        const lower = text.toLowerCase();
+
+        if (
+          lower.includes("weather") ||
+          lower.includes("temperature") ||
+          lower.includes("wind") ||
+          lower.includes("rain") ||
+          lower.includes("sunny")
+        ) {
+          if (weatherData && weatherData.current_weather) {
+            const cw = weatherData.current_weather;
+            const desc = weatherData.weatherDescription || "Unknown";
+            appendMessage(
+              `Current weather: ${cw.temperature}°C, ${desc}, wind ${cw.windspeed} km/h.`,
+              "ai"
+            );
+          } else {
+            appendMessage(
+              "Weather data is not loaded yet. Please click Refresh Weather and try again.",
+              "error"
+            );
+          }
+          return;
+        }
+
+        if (
+          lower.includes("rate") ||
+          lower.includes("currency") ||
+          lower.includes("usd") ||
+          lower.includes("eur") ||
+          lower.includes("gbp") ||
+          lower.includes("inr")
+        ) {
+          if (currencyData && currencyData.rates && currencyData.rates.INR) {
+            const usdPerInr = (1 / currencyData.rates.INR).toFixed(4);
+            const eurPerInr = currencyData.rates.EUR
+              ? (currencyData.rates.EUR / currencyData.rates.INR).toFixed(4)
+              : "N/A";
+            const gbpPerInr = currencyData.rates.GBP
+              ? (currencyData.rates.GBP / currencyData.rates.INR).toFixed(4)
+              : "N/A";
+
+            appendMessage(
+              `Exchange rates: 1 INR = ${usdPerInr} USD, ${eurPerInr} EUR, ${gbpPerInr} GBP.`,
+              "ai"
+            );
+          } else {
+            appendMessage(
+              "Currency data is not loaded yet. Please click Refresh Rates and try again.",
+              "error"
+            );
+          }
+          return;
+        }
+
+        if (
+          lower.includes("citizen") ||
+          lower.includes("person") ||
+          lower.includes("featured") ||
+          lower.includes("name") ||
+          lower.includes("email")
+        ) {
+          const r = citizenData && citizenData.results && citizenData.results[0];
+          if (r) {
+            appendMessage(
+              `Featured citizen: ${r.name.first} ${r.name.last} from ${r.location.city}. Email: ${r.email}.`,
+              "ai"
+            );
+          } else {
+            appendMessage(
+              "Citizen data is not loaded yet. Please click New Citizen and try again.",
+              "error"
+            );
+          }
+          return;
+        }
+
+        if (
+          lower.includes("fact") ||
+          lower.includes("tell me") ||
+          lower.includes("city fact")
+        ) {
+          if (factData && factData.text) {
+            appendMessage(`City fact: ${factData.text}`, "ai");
+          } else {
+            appendMessage(
+              "Fact data is not loaded yet. Please refresh the fact card and try again.",
+              "error"
+            );
+          }
+          return;
+        }
+
+        appendMessage(
+          "I can help with weather, exchange rates, featured citizen details, and the city fact. Try asking about one of those.",
+          "ai"
+        );
+      } catch (e) {
+        removeThinking();
+        appendMessage(
+          "The AI service is unavailable, but I can still answer dashboard questions about weather, exchange rates, citizens, and facts.",
+          "error"
+        );
+      }
+    }
+
     window.onload = async () => {
-      // Secure Backend-for-Frontend requests
       await Promise.allSettled([
         fetchWeather(),
         fetchCurrency(),
@@ -496,125 +1167,6 @@
         fetchFact()
       ]);
     };
-
-    // --- CHATBOT UI ---
-    function toggleChatbot() {
-      const w = document.getElementById('chatWindow');
-      w.classList.toggle('open');
-      if(w.classList.contains('open')) setTimeout(() => document.getElementById('chatInput').focus(), 300);
-    }
-    function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
-    
-    function appendMessage(text, role) {
-      const c = document.getElementById('chatMessages');
-      const d = document.createElement('div');
-      d.className = 'message ' + role;
-      d.textContent = text;
-      c.appendChild(d);
-      c.scrollTop = c.scrollHeight;
-    }
-    
-    function showThinking() {
-      const c = document.getElementById('chatMessages');
-      const d = document.createElement('div');
-      d.className = 'thinking';
-      d.id = 'thinkingIndicator';
-      d.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-      c.appendChild(d);
-      c.scrollTop = c.scrollHeight;
-    }
-    function removeThinking() {
-      const el = document.getElementById('thinkingIndicator');
-      if(el) el.remove();
-    }
-    
-    async function sendMessage() {
-  const inputEl = document.getElementById('chatInput');
-  const text = inputEl.value.trim();
-  if (!text) return;
-
-  appendMessage(text, 'user');
-  inputEl.value = '';
-  showThinking();
-
-  const payload = {
-    question: text,
-    dashboardData: {
-      weatherData,
-      currencyData,
-      citizenData,
-      factData
-    }
-  };
-
-  try {
-    const res = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    let data = {};
-    try {
-      data = await res.json();
-    } catch (_) {
-      data = {};
-    }
-
-    removeThinking();
-
-    if (res.ok && data && data.reply) {
-      appendMessage(data.reply, 'ai');
-      return;
-    }
-
-    const lower = text.toLowerCase();
-
-    if (lower.includes('weather') || lower.includes('temperature') || lower.includes('wind') || lower.includes('rain') || lower.includes('sunny')) {
-      if (weatherData && weatherData.current_weather) {
-        const cw = weatherData.current_weather;
-        const desc = weatherData.weatherDescription || 'Unknown';
-        appendMessage(`Current weather: ${cw.temperature}°C, ${desc}, wind ${cw.windspeed} km/h.`, 'ai');
-      } else {
-        appendMessage('Weather data is not loaded yet. Please click Refresh Weather and try again.', 'error');
-      }
-      return;
-    }
-
-    if (lower.includes('rate') || lower.includes('currency') || lower.includes('usd') || lower.includes('eur') || lower.includes('gbp') || lower.includes('inr')) {
-      if (currencyData && currencyData.rates && currencyData.rates.INR) {
-        const usdPerInr = (1 / currencyData.rates.INR).toFixed(4);
-        const eurPerInr = currencyData.rates.EUR ? (currencyData.rates.EUR / currencyData.rates.INR).toFixed(4) : 'N/A';
-        const gbpPerInr = currencyData.rates.GBP ? (currencyData.rates.GBP / currencyData.rates.INR).toFixed(4) : 'N/A';
-        appendMessage(`Exchange rates: 1 INR = ${usdPerInr} USD, ${eurPerInr} EUR, ${gbpPerInr} GBP.`, 'ai');
-      } else {
-        appendMessage('Currency data is not loaded yet. Please click Refresh Rates and try again.', 'error');
-      }
-      return;
-    }
-
-    if (lower.includes('citizen') || lower.includes('person') || lower.includes('featured') || lower.includes('name') || lower.includes('email')) {
-      const r = citizenData && citizenData.results && citizenData.results[0];
-      if (r) {
-        appendMessage(`Featured citizen: ${r.name.first} ${r.name.last} from ${r.location.city}. Email: ${r.email}.`, 'ai');
-      } else {
-        appendMessage('Citizen data is not loaded yet. Please click New Citizen and try again.', 'error');
-      }
-      return;
-    }
-
-    if (lower.includes('fact') || lower.includes('tell me') || lower.includes('city fact')) {
-      if (factData && factData.text) {
-        appendMessage(`City fact: ${factData.text}`, 'ai');
-      } else {
-        appendMessage('Fact data is not loaded yet. Please refresh the fact card and try again.', 'error');
-      }
-      return;
-    }
-
-    appendMessage('I can help with weather, exchange rates, featured citizen details, and the city fact. Try asking about one of those.', 'ai');
-  } catch (e) {
-    removeThinking();
-    appendMessage('The AI service is unavailable, but I can still answer dashboard questions about weather, exchange rates, citizens, and facts.', 'error');
-  }
-}
+  </script>
+</body>
+</html>
