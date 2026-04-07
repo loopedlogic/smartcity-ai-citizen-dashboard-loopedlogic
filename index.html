@@ -529,53 +529,92 @@
     }
     
     async function sendMessage() {
-      const inputEl = document.getElementById('chatInput');
-      const text = inputEl.value.trim();
-      if(!text) return;
-      
-      appendMessage(text, 'user');
-      inputEl.value = '';
-      showThinking();
-      
-      const payload = {
-          question: text,
-          dashboardData: {
-              weatherData,
-              currencyData,
-              citizenData,
-              factData
-          }
-      };
+  const inputEl = document.getElementById('chatInput');
+  const text = inputEl.value.trim();
+  if (!text) return;
 
-      try {
-        const res = await fetch("/.netlify/functions/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        let data = {};
-        try {
-          data = await res.json();
-        } catch (_) {
-          data = {};
-        }
-        removeThinking();
-        if (data && data.reply) {
-          appendMessage(data.reply, res.ok ? "ai" : "error");
-        } else {
-          appendMessage(
-            "Sorry, the chat service is unavailable. Deploy to Netlify with HF_TOKEN or OPENROUTER_API_KEY set.",
-            "error"
-          );
-        }
-      } catch (e) {
-        removeThinking();
-        appendMessage(
-          "Sorry, the server is currently unavailable. Use `npm run dev` (Netlify Dev) or deploy to Netlify.",
-          "error"
-        );
-      }
+  appendMessage(text, 'user');
+  inputEl.value = '';
+  showThinking();
+
+  const payload = {
+    question: text,
+    dashboardData: {
+      weatherData,
+      currencyData,
+      citizenData,
+      factData
     }
-  </script>
-</body>
-</html>
+  };
+
+  try {
+    const res = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (_) {
+      data = {};
+    }
+
+    removeThinking();
+
+    if (res.ok && data && data.reply) {
+      appendMessage(data.reply, 'ai');
+      return;
+    }
+
+    const lower = text.toLowerCase();
+
+    if (lower.includes('weather') || lower.includes('temperature') || lower.includes('wind') || lower.includes('rain') || lower.includes('sunny')) {
+      if (weatherData && weatherData.current_weather) {
+        const cw = weatherData.current_weather;
+        const desc = weatherData.weatherDescription || 'Unknown';
+        appendMessage(`Current weather: ${cw.temperature}°C, ${desc}, wind ${cw.windspeed} km/h.`, 'ai');
+      } else {
+        appendMessage('Weather data is not loaded yet. Please click Refresh Weather and try again.', 'error');
+      }
+      return;
+    }
+
+    if (lower.includes('rate') || lower.includes('currency') || lower.includes('usd') || lower.includes('eur') || lower.includes('gbp') || lower.includes('inr')) {
+      if (currencyData && currencyData.rates && currencyData.rates.INR) {
+        const usdPerInr = (1 / currencyData.rates.INR).toFixed(4);
+        const eurPerInr = currencyData.rates.EUR ? (currencyData.rates.EUR / currencyData.rates.INR).toFixed(4) : 'N/A';
+        const gbpPerInr = currencyData.rates.GBP ? (currencyData.rates.GBP / currencyData.rates.INR).toFixed(4) : 'N/A';
+        appendMessage(`Exchange rates: 1 INR = ${usdPerInr} USD, ${eurPerInr} EUR, ${gbpPerInr} GBP.`, 'ai');
+      } else {
+        appendMessage('Currency data is not loaded yet. Please click Refresh Rates and try again.', 'error');
+      }
+      return;
+    }
+
+    if (lower.includes('citizen') || lower.includes('person') || lower.includes('featured') || lower.includes('name') || lower.includes('email')) {
+      const r = citizenData && citizenData.results && citizenData.results[0];
+      if (r) {
+        appendMessage(`Featured citizen: ${r.name.first} ${r.name.last} from ${r.location.city}. Email: ${r.email}.`, 'ai');
+      } else {
+        appendMessage('Citizen data is not loaded yet. Please click New Citizen and try again.', 'error');
+      }
+      return;
+    }
+
+    if (lower.includes('fact') || lower.includes('tell me') || lower.includes('city fact')) {
+      if (factData && factData.text) {
+        appendMessage(`City fact: ${factData.text}`, 'ai');
+      } else {
+        appendMessage('Fact data is not loaded yet. Please refresh the fact card and try again.', 'error');
+      }
+      return;
+    }
+
+    appendMessage('I can help with weather, exchange rates, featured citizen details, and the city fact. Try asking about one of those.', 'ai');
+  } catch (e) {
+    removeThinking();
+    appendMessage('The AI service is unavailable, but I can still answer dashboard questions about weather, exchange rates, citizens, and facts.', 'error');
+  }
+}
